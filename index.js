@@ -1,51 +1,41 @@
 const TelegramBot = require("node-telegram-bot-api");
 const token = "1133223306:AAH9c3cWzBqoE5dqxyy4j6FC-5v6W5J2-mQ";
+const https = require("https");
 
 const bot = new TelegramBot(token, { polling: true });
 
-bot.on("message", (msg) => {
-	"gato el que lee";
+function getMeme(callback) {
+	var data2;
+	https
+		.get("https://meme-api.herokuapp.com/gimme", (resp) => {
+			let data = "";
 
-});
+			// A chunk of data has been recieved.
+			resp.on("data", (chunk) => {
+				data += chunk;
+			});
+
+			// The whole response has been received. Print out the result.
+			resp.on("end", () => {
+				console.log(JSON.parse(data).url);
+				data2 = JSON.parse(data).url;
+				callback(data2);
+			});
+		})
+		.on("error", (err) => {
+			console.log("Error");
+			console.log("Error: " + err.message);
+		});
+}
 
 bot.on("message", (msg) => {
-	var Hi = "hola";
-	if (msg.text.toString().toLowerCase().indexOf(Hi) === 0) {
-		bot.sendMessage(msg.chat.id, "Gatito el que lee");
+	var meme = "meme";
+	if (msg.text.toString().toLocaleLowerCase().indexOf(meme) === 0) {
+		getMeme(function (elMeme) {
+			let epoch = new Date().getTime();
+			bot.sendPhoto(msg.chat.id, elMeme + "?time=" + epoch);
+		});
 	}
 });
 
-bot.on("message", (msg) => {
-	var maurito = "maurito";
-	if (msg.text.toString().toLowerCase().indexOf(maurito) === 0) {
-		bot.sendMessage(msg.chat.id, "Es muy bonito");
-	}
-});
-
-bot.on("message", (msg) => {
-	var camit = "camit";
-	if (msg.text.toString().toLowerCase().indexOf(camit) === 0) {
-		bot.sendMessage(msg.chat.id, "Es muy bonita");
-	}
-});
-
-bot.on("message", (msg) => {
-	var sakurita = "sakurita";
-	if (msg.text.toString().toLowerCase().indexOf(sakurita) === 0) {
-		bot.sendMessage(msg.chat.id, "Es muy bonita");
-	}
-});
-
-bot.on("message", (msg) => {
-	var bye = "bye";
-	if (msg.text.toString().toLowerCase().indexOf(bye) === 0) {
-		bot.sendMessage(msg.chat.id, "Chau gato");
-	}
-});
-
-bot.on("message", (msg) => {
-	var gatitos = ["maurito", "camit", "sakurita", "flor"];
-	if (msg.text.toString().toLowerCase().indexOf(gatitos) === 0) {
-		bot.sendMessage(msg.chat.id, "Lista de gatos");
-	}
-});
+bot.on("polling_error", (err) => console.log(err));
